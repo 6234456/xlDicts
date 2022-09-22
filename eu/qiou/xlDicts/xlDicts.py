@@ -33,7 +33,8 @@ class xlDicts:
                            startRow        from which row to start
                            endRow          ends at which row
                            ignoreNullVal   whether to ignore the key if the corresponding value is None, default True
-                           setNullValTo    set the None value to the given value, valid only when ignoreNullVal is False
+                                           if any one of the values is not None, the key will not be dropped
+                           setNullValTo    set the None value to the given value
                            reversed        read from top to bottom. the duplicated value will be replaced by the one below
                """
         s = self.__getSht(sht)
@@ -65,8 +66,11 @@ class xlDicts:
 
         self.data = {k: v for k, v in dict(zip(k, v)).items() if not k is None}
 
-        if not asFormula and ignoreNullVal:
-            self.data = {k: [i or setNullValTo for i in v] for k, v in self.data.items() if any(v)}
+        if not asFormula:
+            if ignoreNullVal:
+                self.data = {k: [setNullValTo if i is None else i for i in v] for k, v in self.data.items() if any([i is not None for i in v])}
+            else:
+                self.data = {k: [setNullValTo if i is None else i for i in v] for k, v in self.data.items()}
 
         if len(valCol) == 1:
             self.data = {k: v[0] for k, v in self.data.items()}
